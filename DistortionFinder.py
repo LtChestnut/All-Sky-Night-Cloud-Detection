@@ -7,7 +7,7 @@
 # theta = angle from zenith
 
 # DistFromCenter (pixels) = a0 + a1*theta + a2*theta^2...etc
-# a0 = 0 
+# a0 = 0 ``
 
 import numpy as np
 from scipy.optimize import curve_fit
