@@ -1,3 +1,5 @@
+##This is a small script to solve for the photometric parameters so that flux and magnitude can be compared
+
 import numpy as np
 from scipy.optimize import curve_fit
 
@@ -9,13 +11,10 @@ import config
 
 
 def main():
+    # Load image and catalouge
     astro_image = AstroImage(config.clear_night)
-
     astro_image.normalize_image()
     astro_image.stretch_image()
-    #astro_image.display_image()
-    print(astro_image.loctime)
-
     cat_table = load_cat(astro_image.obstime)
 
     alt = cat_table['coords'].alt.degree
@@ -25,7 +24,6 @@ def main():
 
     stars = measure_star_brightness(stars, astro_image)
 
-    plot_stars(stars, astro_image, Markers = True)
 
     # Example data (replace with your actual data)
     magnitude = [star[2] for star in stars]

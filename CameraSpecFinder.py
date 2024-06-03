@@ -1,3 +1,8 @@
+##This is a small script to solve for the camera parameters using Powell's method. 
+##Camera parameters are the rotation, X/Y zenith pixels and the lens FOV in pixels
+##Solved information is placed into the config file
+
+
 import numpy as np
 import scipy.ndimage
 from PIL import Image

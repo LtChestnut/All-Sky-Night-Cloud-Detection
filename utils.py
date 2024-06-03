@@ -1,3 +1,5 @@
+##Utilities used in the program
+
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
@@ -9,26 +11,16 @@ from PIL import Image
 from matplotlib.colors import Normalize
 
 def downsample_image(image, factor):
-    """ Downsample the image by the given factor. """
+    ## Downsample the image by the given factor.
     return cv2.resize(image, (image.shape[1] // factor, image.shape[0] // factor), interpolation=cv2.INTER_LINEAR)
 
 def upsample_data(data, original_shape):
-    """ Upsample the data to match the original image shape using interpolation. """
+    ## Upsample the data to match the original image shape using interpolation.
     return cv2.resize(data, (original_shape[1], original_shape[0]), interpolation=cv2.INTER_LINEAR)
 
 def pixel_to_alt_az(image):
-    """
-    Convert pixel coordinates in a downsampled all-sky camera image to altitude and azimuth.
+    ## Convert pixel coordinates in a downsampled all-sky camera image to altitude and azimuth.
 
-    Parameters:
-        image (np.array): The downsampled image from the all-sky camera.
-        zenith (tuple): The (x, y) coordinates of the zenith pixel in the full-resolution image.
-        FOV (float): The field of view of the camera in degrees.
-        downsample_factor (int): The factor by which the image was downsampled.
-
-    Returns:
-        np.array: A 3D array where each element contains [altitude, azimuth].
-    """
     zenith = config.zenith
     FOV = config.fov
     downsample_factor = config.altaz_DS_Factor
@@ -60,6 +52,8 @@ def pixel_to_alt_az(image):
     return alt_az_map
 
 def alt_az_to_pixel(altitude, azimuth, x_offset, y_offset, camera_rotation, radius):
+    ##Convert and altitude and azimuth coordinate to a pixel value
+
     rotation_rad = np.deg2rad(camera_rotation)
     # Convert angles from degrees to radians
     altitude_rad = np.deg2rad(altitude)
@@ -84,13 +78,14 @@ def alt_az_to_pixel(altitude, azimuth, x_offset, y_offset, camera_rotation, radi
     return int(x), int(y)
 
 def polynomial_projection(theta):
-    """ Calculate radial distance r for a given theta using polynomial coefficients. """
-    # Calculate r as a polynomial function of theta: r = a0 + a1*theta + a2*theta^2 + ...
+    ## Calculate radial distance r for a given theta using polynomial coefficients.
     r = np.polyval(config.disortion_coeffs[::-1], theta)
     return r
 
 
 def display_alt_az_map(Alt_Az_Map):
+    ##Display an altitude and azimuth map. Function used for early testing of program. 
+
     altitude = Alt_Az_Map[:, :, 0]
     azimuth = Alt_Az_Map[:, :, 1]
 
@@ -117,6 +112,7 @@ def display_alt_az_map(Alt_Az_Map):
 
 
 def plot_select_stars(alt, az, image,  x_offset, y_offset, camera_rotation, radius):
+    ## Used to plot specified stars that appear in test images for debugging purposes. 
     
     StarIndex = [
         (3451, 'Antares'),
@@ -158,15 +154,20 @@ def plot_select_stars(alt, az, image,  x_offset, y_offset, camera_rotation, radi
     plt.show()
 
 def rgb2gray(rgb):
+    ##Convert an RGB image into a grey image
+
     return np.dot(rgb[...,:3], [0.2989, 0.5870, 0.1140])
 
 
 def least_squares_loss(predicted, observed, delta):
-    """Calculate the least squares loss."""
+    ##Calculate the least squares loss. Used for camera parameter determination
+
     residual = predicted - observed
     return 0.5 * np.sum(residual ** 2)
 
 def objective_function(params, star_data, delta=1):
+    ##Calculate the 'score' of the current guess of camera parameters
+    
     x_offset, y_offset, camera_rotation, radius = params
     total_error = 0
     for observed_x, observed_y, altitude, azimuth in star_data:
@@ -178,16 +179,16 @@ def objective_function(params, star_data, delta=1):
     return total_error
 
 def plot_stars(stars, image, Markers):
+    ##Plots all stars being used in program calculation
+
     fig, ax = plt.subplots(figsize=(10, 8))
-    #plt.figure(figsize=(10, 8))
     ax.imshow(image.stretched_image, cmap='gray', origin='lower')
 
-    # Initialize a list to keep track of plotted star positions and their magnitudes
-    
+
     # Plot all stars that made it through the check
     for i in range(len(stars)):
         center = [stars[i][0], stars[i][1]]
-        plt.scatter(center[0], center[1], s=20, color='red', edgecolor='white')
+        #plt.scatter(center[0], center[1], s=20, color='red', edgecolor='white')
         if Markers == True:
             circle = Circle(center, config.apertureRadius, color='g', fill=False, linewidth=2)
             ax.add_patch(circle)
@@ -204,6 +205,8 @@ def plot_stars(stars, image, Markers):
     plt.show()
 
 def measure_star_brightness(stars, image):
+    ## Measure star brightnesses using photometry
+
     green_channel = image.color_image[:, :, 1]
     for i in range(len(stars)):
         #positions = (find_brightest_point(green_channel, stars[i][0], stars[i][1], 20))
@@ -234,11 +237,15 @@ def measure_star_brightness(stars, image):
     return stars
 
 def lower_quartile_mean(data):
+    ##Calculate the lower quartile mean pixel value of provided array
+
     sorted_data = np.sort(data.ravel())
     lower_quartile = sorted_data[:len(sorted_data) // 75]
     return np.mean(lower_quartile)
 
 def find_brightest_point(image_data, x_coord, y_coord, search_radius):
+    ##Find the brightest point within a search radius on an image
+
     # Extract a sub-array around the initial coordinates
     x_min = max(0, x_coord - search_radius)
     x_max = min(image_data.shape[1], x_coord + search_radius + 1)
@@ -255,17 +262,22 @@ def find_brightest_point(image_data, x_coord, y_coord, search_radius):
 
 
 def plot_mag_vs_photometry(stars):
+    ##Plot the magnitude vs measured photometric value. Used for the photometric calibration 
+
     for i in range(len(stars)):
         plt.scatter(stars[i][2], stars[i][6], s=20, color='red', edgecolor='white')
 
-    
     plt.title('Known magnitude vs measured brightness')
     plt.show()
 
 def stellar_brightness(magnitude, a, b):
+    ##Function that the stellar brightness magnitude -> flux conversion follows.
+
     return a * np.power(10, -0.4 * magnitude) + b
 
 def calculate_cloud_percent(stars):
+    ## Calculate the cloud % at a stars location
+
     for i in range(len(stars)):
         estimated_flux = stellar_brightness(stars[i][2], config.flux_a, config.flux_b)
         actual_flux = stars[i][6]
@@ -277,6 +289,8 @@ def calculate_cloud_percent(stars):
     return stars
 
 def plot_brightnesses(stars):
+    ## Calculate and plot the brightness of clouds over the whole image. 
+
     # Example data (replace with your actual data)
     x = [star[0] for star in stars]
     y = [star[1] for star in stars]
@@ -293,25 +307,21 @@ def plot_brightnesses(stars):
     # Plot the interpolated scatter plot
     plt.figure(figsize=(8, 6))
     plt.scatter(x, y, c=brightness, cmap='magma', marker='o', edgecolors='none')
-    plt.imshow(brightness_interp, extent=(min(x), max(x), min(y), max(y)), origin='lower', cmap='magma', alpha=0.5)
-    plt.colorbar(label='Brightness')
+    plt.imshow(brightness_interp, extent=(min(x), max(x), min(y), max(y)), origin='lower', cmap='magma', alpha=0.5,  vmin=0, vmax=1)
+    plt.colorbar(label='Cloud %')
     plt.xlabel('X')
     plt.ylabel('Y')
-    plt.title('Measured and Interpolated Brightness Values')
+    plt.xlim(0, 3008)
+    plt.ylim(0, 3008)
+    plt.title('Cloud Map of All-Sky Image')
     plt.show()
 
 def mask_stars(stars):
-    """
-    Filters out coordinates that fall on the black part of a mask.
+    #Filters out coordinates that fall on the black part of a provided mask.
 
-    :param coords: List of (x, y) tuples.
-    :param mask_path: Path to the binary mask image.
-    :return: List of (x, y) tuples that are on the white part of the mask.
-    """
     # Load the mask image
     mask = Image.open(config.mask_path)
     mask = np.array(mask)
-
 
     # Filter coordinates
     filtered_coords = [coord for coord in stars if mask[coord[1], coord[0]] == 255]
@@ -320,6 +330,8 @@ def mask_stars(stars):
 
 
 def plot_cloud_map(stars, astro_image):
+    ## Display the orginal image and the red highlighted clouds. 
+
     # Display the astronomical image
     fig, ax = plt.subplots(figsize=(8, 6))
     
@@ -364,5 +376,5 @@ def plot_cloud_map(stars, astro_image):
     ax.set_title('Overlay of Star Catalog and Cloud Map on Image')
     ax.set_xlim([0, config.size])
     ax.set_ylim([0, config.size])
-
+    plt.gca().invert_yaxis()
     plt.show()

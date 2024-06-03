@@ -12,16 +12,19 @@ disortion_coeffs = [0, 1370.48875333, -1554.24783798,  4270.9858841 , -6101.8812
 flux_a = 1449799.4772564045 # 1034331.76618567
 flux_b = 22101.980314846012
 
+DIR = 'C:/Users/cheha/Documents/School/cosc428-cloud-detector/'
+
 ##Script Paramters
-cloudy_night = 'C:/Users/cheha/Documents/School/cosc428-cloud-detector/cloudy_image.fit'
-clear_night = 'C:/Users/cheha/Documents/School/cosc428-cloud-detector/TestImage2.fit'
-simulated_cloud_night = 'C:/Users/cheha/Documents/School/cosc428-cloud-detector/simulated_cloud_image.fit'
-cat_path = 'C:/Users/cheha/Documents/School/cosc428-cloud-detector/StarCatSmall.csv'
-mask_path = 'C:/Users/cheha/Documents/School/cosc428-cloud-detector/AllSkyMask.png'
+cloudy_night = DIR + 'Inputs/cloudy_image.fit'
+clear_night = DIR + 'Inputs/TestImage2.fit'
+cloudy_night2 = DIR + 'Inputs/Cloudy_image2.fit'
+simulated_cloud_night = DIR + 'Inputs/simulated_cloud_image.fit'
+cat_path = DIR + 'Inputs/StarCatSmall.csv'
+mask_path = DIR + 'Inputs/AllSkyMask.png'
 stretchB_factor = 0.1
 stretchC_factor = 2
 altaz_DS_Factor = 5
-altLimit = 15
+altLimit = 5
 starRadius = 50
 magLimit = 5
 apertureRadius = 7

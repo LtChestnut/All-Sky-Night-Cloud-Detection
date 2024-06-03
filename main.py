@@ -14,7 +14,7 @@ astro_image = AstroImage(config.clear_night)
 #astro_image.process_image(0.25, 2)
 astro_image.normalize_image()
 astro_image.stretch_image()
-astro_image.display_image()
+#astro_image.display_image()
 #print(astro_image.loctime)
 #print(np.shape(astro_image.get_normalized_image()))
 
@@ -34,7 +34,7 @@ stars = generate_stars(cat_table)
 
 stars = measure_star_brightness(stars, astro_image)
 
-#plot_stars(stars, astro_image, Markers = False)
+plot_stars(stars, astro_image, Markers = True)
 
 stars = mask_stars(stars)
 
@@ -43,5 +43,5 @@ stars = mask_stars(stars)
 stars = calculate_cloud_percent(stars)
 
 
-# plot_brightnesses(stars)
-# plot_cloud_map(stars, astro_image)
+plot_brightnesses(stars)
+#plot_cloud_map(stars, astro_image)
